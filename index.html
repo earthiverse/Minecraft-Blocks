@@ -4,9 +4,29 @@
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 	<title>Minecraft-Blocks</title>
+	
+	<script type="text/javascript" src="lib/jszip.js"></script>
+	<script type="text/javascript" src="lib/jszip-load.js"></script>
+	<script type="text/javascript" src="lib/jszip-inflate.js"></script>
 </head>
 
 <body>
-	<p>Content</p>
+	<p id="content">Content</p>
+	<script type="text/javascript">
+		var xhr2_arraybuffer = new XMLHttpRequest();
+		xhr2_arraybuffer.open('GET', 'textures/Coterie-Craft-v4s30.zip', true);
+		xhr2_arraybuffer.responseType = 'arraybuffer';
+
+		xhr2_arraybuffer.onreadystatechange = function(e) {
+			if (this.readyState == 4 && this.status == 200) {
+				var zip = new JSZip(this.response);
+				var elt = document.getElementById('content');
+				elt.innerHTML = "loaded ! (as a " + this.response + ")";
+				elt.innerHTML += "<p>Content = " + zip.file("pack.mcmeta").asText() + "</p>";
+			}
+		}
+		
+		xhr2_arraybuffer.send();
+	</script>
 </body>
 </html>
