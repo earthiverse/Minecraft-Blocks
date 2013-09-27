@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-import sys, zipfile
+import os, subprocess, sys, tempfile, zipfile
 
 in_zip = zipfile.ZipFile(sys.argv[1], 'r')
 out_zip = zipfile.ZipFile("out.zip", 'w', zipfile.ZIP_DEFLATED)
@@ -8,38 +8,38 @@ bad_files = set()
 
 # Remove un-needed stuff from zip
 for f in all_files:
-    if "Thumbs.db" in f:
-        bad_files.add(f)
-    elif f.endswith(".mcmeta"):
-        bad_files.add(f)
-    elif "mcpatcher" in f:
-        bad_files.add(f)
-    elif "font" in f:
-        bad_files.add(f)
-    elif "icons" in f:
-        bad_files.add(f)
-    elif "lang" in f:
-        bad_files.add(f)
-    elif "Plethora" in f:
-        bad_files.add(f)
-    elif "texts" in f:
-        bad_files.add(f)
-        
-    elif "textures/aether" in f:
-        bad_files.add(f)
-    elif "textures/environment" in f:
-        bad_files.add(f)
-    # textures/font taken care of by previous 'font' in
-    elif "textures/gui" in f:
-        bad_files.add(f)
-    elif "textures/map" in f:
-        bad_files.add(f)
-    elif "textures/misc" in f:
-        bad_files.add(f)
-    elif "textures/particle" in f:
-        bad_files.add(f)
+	print(f)
+	## The Files That Matter
+	if "assets/minecraft/textures/blocks" not in f	and "assets/minecraft/textures/items" not in f:
+		bad_files.add(f)
+
+	## Other Useless Files
+	if "Thumbs.db" in f:
+		bad_files.add(f)
+	elif f.endswith(".mcmeta"):
+		bad_files.add(f)
+	## We only care about pngs
+	elif ".png" not in f:
+		bad_files.add(f)
 
 # Put everything that's left in a 'good' zip file
 for f in set.difference(all_files, bad_files):
-    temp = in_zip.read(f)
-    out_zip.writestr(f, temp)
+	# Read from Zip
+	temp_in = in_zip.read(f)
+
+	## Optimize
+	# Make Temp File
+	temp_img = tempfile.NamedTemporaryFile(delete=False)
+	temp_img.write(temp_in)
+	temp_img.close()
+
+	# Optimize
+	subprocess.call(["optipng", "-o5", "-strip all", temp_img.name])
+
+	# Write to Zip
+	temp_img = open(temp_img.name, 'rb')
+	out_zip.writestr(f, temp_img.read())
+	temp_img.close()
+
+	# Remove Temporary File
+	os.unlink(temp_img.name)
