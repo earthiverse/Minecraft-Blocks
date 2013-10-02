@@ -24,6 +24,8 @@ for f in all_files:
 
 # Put everything that's left in a 'good' zip file
 for f in set.difference(all_files, bad_files):
+	print("\n\n")
+	print(f)
 	# Read from Zip
 	temp_in = in_zip.read(f)
 
@@ -34,7 +36,7 @@ for f in set.difference(all_files, bad_files):
 	temp_img.close()
 
 	# Optimize
-	subprocess.call(["optipng", "-o5", "-strip all", temp_img.name])
+	subprocess.call(["optipng", "-o5", "-strip all", "-out", temp_img.name, temp_img.name])
 
 	# Write to Zip
 	temp_img = open(temp_img.name, 'rb')
